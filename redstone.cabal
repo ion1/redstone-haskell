@@ -1,0 +1,22 @@
+Name:         redstone
+Version:      0.0.1
+Author:       Johan Kiviniemi
+License-File: COPYING
+Synopsis:     Bindings for libredstone, a library for interfacing with
+              Minecraft file formats and protocols
+Homepage:     https://github.com/agrif/libredstone
+Category:     Data
+
+Cabal-Version: >= 1.6
+Build-Type:    Simple
+
+Library
+  Exposed-Modules: Redstone.Compression,
+                   Redstone.Error,
+                   Redstone.Prim.Compression,
+                   Redstone.Prim.Memory
+  Build-Depends:   base == 4.*,
+                   bindings-DSL == 1.0.*,
+                   bytestring == 0.9.*
+  Extra-Libraries: redstone
+  GHC-Options:     -Werror -Wall
