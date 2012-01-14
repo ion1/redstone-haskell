@@ -31,26 +31,27 @@ tests = $(testGroupGenerator)
 prop_compressDecompressAuto :: CompressionType -> [Word8] -> Property
 prop_compressDecompressAuto cType (BS.pack -> dataIn) =
   monadicIO $
-    do dataOut <- run (decompress Nothing =<< compress cType dataIn)
+    do Right dataOut <- run (comprDecompr cType Nothing dataIn)
        assert (dataIn == dataOut)
 
 prop_compressDecompressSame :: CompressionType -> [Word8] -> Property
 prop_compressDecompressSame cType (BS.pack -> dataIn) =
   monadicIO $
-    do dataOut <- run (decompress (Just cType) =<< compress cType dataIn)
+    do Right dataOut <- run (comprDecompr cType (Just cType) dataIn)
        assert (dataIn == dataOut)
 
 prop_compressDecompressWrong :: CompressionType -> [Word8] -> Property
 prop_compressDecompressWrong cTypeCom (BS.pack -> dataIn) =
   monadicIO $
     do cTypeDec <- pick . elements $ delete cTypeCom [minBound .. maxBound]
-       pre (cTypeCom /= cTypeDec)
-       assert =<< run (act cTypeDec)
-  where
-    act cTypeDec =
-      Ex.handle (\(_ :: RedstoneError) -> return True)
-        $ do _ <- decompress (Just cTypeDec) =<< compress cTypeCom dataIn
-             return False
+       pre (cTypeCom /= cTypeDec)  -- Redundant, but let’s make sure.
+       Left _err <- run (comprDecompr cTypeCom (Just cTypeDec) dataIn)
+       return ()
+
+comprDecompr :: CompressionType -> Maybe CompressionType -> BS.ByteString
+             -> IO (Either RedstoneError BS.ByteString)
+comprDecompr cTypeCom cTypeDec dataIn =
+  Ex.try (decompress cTypeDec =<< compress cTypeCom dataIn)
 
 prop_compressGetType :: CompressionType -> [Word8] -> Property
 prop_compressGetType cTypeIn (BS.pack -> dataIn) =
