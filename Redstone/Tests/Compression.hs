@@ -14,6 +14,7 @@ import Test.QuickCheck.Monadic
 import Control.Applicative
 import qualified Control.Exception as Ex
 import qualified Data.ByteString as BS
+import Data.List
 import Data.Word
 
 import Redstone.Compression
@@ -39,14 +40,15 @@ prop_compressDecompressSame cType (BS.pack -> dataIn) =
     do dataOut <- run (decompress (Just cType) =<< compress cType dataIn)
        assert (dataIn == dataOut)
 
-prop_compressDecompressWrong :: CompressionType -> CompressionType -> [Word8]
-                             -> Property
-prop_compressDecompressWrong cTypeCom cTypeDec (BS.pack -> dataIn) =
+prop_compressDecompressWrong :: CompressionType -> [Word8] -> Property
+prop_compressDecompressWrong cTypeCom (BS.pack -> dataIn) =
   monadicIO $
-    do pre (cTypeCom /= cTypeDec)
-       assert =<< run act
+    do cTypeDec <- pick . elements $ delete cTypeCom [minBound .. maxBound]
+       pre (cTypeCom /= cTypeDec)
+       assert =<< run (act cTypeDec)
   where
-    act = Ex.handle (\(_ :: RedstoneError) -> return True)
+    act cTypeDec =
+      Ex.handle (\(_ :: RedstoneError) -> return True)
         $ do _ <- decompress (Just cTypeDec) =<< compress cTypeCom dataIn
              return False
 
