@@ -4,11 +4,15 @@ Author:       Johan Kiviniemi
 License-File: COPYING
 Synopsis:     Bindings for libredstone, a library for interfacing with
               Minecraft file formats and protocols
-Homepage:     https://github.com/agrif/libredstone
+Homepage:     https://github.com/ion1/redstone-haskell
 Category:     Data
 
 Cabal-Version: >= 1.9.2
 Build-Type:    Simple
+
+Source-Repository head
+  Type:     git
+  Location: git://github.com/ion1/redstone-haskell.git
 
 Library
   Exposed-Modules: Redstone.Compression,
